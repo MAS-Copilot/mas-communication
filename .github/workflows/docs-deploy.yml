@@ -1,0 +1,49 @@
+name: Build and Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  deploy-docs:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Install docfx
+      shell: pwsh
+      run: |
+        dotnet tool update -g docfx
+        if ($LASTEXITCODE -ne 0) {
+          dotnet tool install -g docfx
+        }
+        "$env:USERPROFILE\.dotnet\tools" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+    - name: Restore dependencies
+      run: dotnet restore mas-communication.sln
+
+    - name: Build documentation
+      working-directory: ./docs
+      run: docfx docfx.json
+
+    - name: Deploy docs to mas.communication-docs repo
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        personal_token: ${{ secrets.DOCS_PAT }}
+        external_repository: MAS-Copilot/mas.communication-docs
+        publish_branch: main
+        publish_dir: docs/_site
+        user_name: 'github-actions[bot]'
+        user_email: 'github-actions[bot]@users.noreply.github.com'
+        commit_message: 'Automated docs deployment [skip ci]'

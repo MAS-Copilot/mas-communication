@@ -1,14 +1,27 @@
----
-layout: landing
-title: "MAS.Communication"
-description: "面向现代 .NET 的工业通信抽象与协议管理框架"
-language: "zh-CN"
----
+# MAS.Communication
 
-> 面向工业自动化的统一通信框架  
-> 基于依赖注入（DI）使用，提供协议实例管理、连接复用与统一读写入口
+## ✨ 项目特性
 
----
+一个面向工业自动化场景的 **多协议通信管理框架**
+
+- **多协议统一抽象**：Modbus TCP、MC Protocol、等协议采用一致的调用模型
+- **多实例管理**：支持同协议多实例并存，适用于一机多 PLC / 多设备通信场景
+- **统一生命周期控制**：统一创建、复用、查询与释放通信实例，避免资源失控
+- **依赖注入集成**：基于 `Microsoft.Extensions.DependencyInjection`，便于工程化接入
+- **易于扩展**：可按统一规范扩展新的通信协议，而无需改动上层业务逻辑
+- **面向工业项目落地**：适用于 WPF、WinUI、后台服务等现代 .NET 应用
+
+## 🎯 项目定位
+
+`MAS.Communication` 是一个面向工业自动化的 .NET 通信框架，
+用于在现代 .NET 应用中 **统一接入、管理和复用多种工业通信协议实例**
+
+- 统一的通信抽象
+- 多实例与多设备管理能力
+- 一致的生命周期控制
+- 面向依赖注入的工程化集成方式
+
+适合构建中大型上位机系统中的通信基础设施层
 
 ## ⚠️ 使用前提
 
@@ -36,15 +49,16 @@ services.AddCommunication();
 
 ### 通信配置
 
-在使用具体协议前，需要先提供对应的通信配置对象。框架为不同协议提供了统一配置接口：
+在使用具体协议前，需要先提供对应的通信配置对象
 
-| 协议 | 配置接口 |
-| ---- | ---- |
-| MC（Mitsubishi） | `IMcCommunicationConfig` |
-| ModbusTCP | `IModbusCommunicationConfig` |
-| S7（Siemens） | `IS7CommunicationConfig` |
+框架已经为不同协议提供了统一的配置接口，调用方无需自行定义新的协议配置接口，只需要根据实际项目实现对应接口即可
 
-以上接口均继承自 `ICommunicationConfig`，调用方需继承并实现它
+例如：
+
+- MC 协议使用：`IMcCommunicationConfig`
+- Modbus 协议使用：`IModbusCommunicationConfig`
+
+以上接口均继承自 `ICommunicationConfig`，调用方实现对应接口后，即可将配置对象传入 `IProtocolManager`，用于创建或获取协议实例
 
 ### 使用方式
 
@@ -83,4 +97,4 @@ public class MainViewModel {
 - 支持创建多个不同配置的协议实例（例如多个 PLC）
 - 当不再需要使用某个实例时，请调用`IProtocolManager.Remove(IProtocol)`或`IProtocol.Dispose()`方法释放资源
 - 不建议多个线程高并发共享一个实例做高频通信，虽然目前来说它们暂时是线程安全的
-- 有关更多信息，请参阅 API 文档
+- 有关更多信息，请参阅[API 文档](https://mas-copilot.github.io/mas.communication-docs/api/MAS.Communication.html)
