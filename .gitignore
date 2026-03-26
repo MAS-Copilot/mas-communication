@@ -1,0 +1,121 @@
+# 忽略编译和运行时生成的文件夹
+bin/
+obj/
+TestResults/
+
+# 忽略 Visual Studio 临时文件、用户特定文件和所有生成的文件
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# 用户特定项目文件
+*.csproj.user
+*.vbproj.user
+*.fsproj.user
+
+# 自动生成的 AssemblyInfo
+[Pp]ackages/[Aa]ssembly[Ii]nfo.*
+
+# VS 索引和缓存
+*.ncb
+*.sdf
+*.cache
+*.ilk
+*.log
+
+# Visual Studio 2015/2017 缓存/项目文件
+.vs/
+.vsconfig
+
+# Windows image文件
+Thumbs.db
+
+# ReSharper 文件
+_ReSharper*/
+
+# 其他 JetBrains 工具
+.idea/
+
+# Resharper 和 Rider 缓存
+[rR]e[Ss]harper*/
+*.DotSettings.user
+
+# TeamCity 项目
+_TeamCity*
+
+# 工具生成的文件夹
+Generated_Code/
+
+# 模板引擎相关
+TemplateEngineHost/
+.templateengine/
+
+# NuGet 生成的文件
+packages/*
+*.nupkg
+*.snupkg
+
+# 新增：NuGet 锁文件
+packages.lock.json
+project.lock.json
+DependencyModel.cache
+
+# 忽略 Visual Studio Code 文件夹
+.vscode/
+
+# 忽略常见的 macOS 文件
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 忽略Windows缓存文件
+ehthumbs.db
+ehthumbs_vista.db
+
+# docfx
+docs/api/
+docs/_site/
+docs/mas.communication-docs/
+
+# 忽略 Node.js 依赖
+node_modules/
+
+# 忽略 npm 缓存目录
+.npm/
+
+# 忽略操作系统生成的临时文件
+*.tmp
+*.temp
+*.swp
+
+# 忽略 IDE 特定文件
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 忽略构建输出
+dist/
+build/
+public/build/
+
+# 忽略环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 忽略 Yarn 缓存目录
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# .NET 测试和模拟文件
+**/*.mockproj
+**/*.testsettings
+
+# SB
+/AwakenGPUToolLog.txt
+/images_v2.db

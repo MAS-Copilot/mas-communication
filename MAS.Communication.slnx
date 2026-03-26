@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/ISSUE_TEMPLATE/bug-report.md" />
+    <File Path=".github/ISSUE_TEMPLATE/code-improvement.md" />
+    <File Path=".github/ISSUE_TEMPLATE/feature_request.md" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="logo.ico" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/MAS.CommunicationUnitTest/MAS.CommunicationUnitTest.csproj" Id="bb243149-f745-4c5d-8cfc-3a9ee86d97c0" />
+  </Folder>
+  <Project Path="src\MAS.Communication\MAS.Communication.csproj" />
+</Solution>

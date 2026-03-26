@@ -1,0 +1,35 @@
+<Project>
+	<PropertyGroup>
+		<MSBuildNodeReuse>true</MSBuildNodeReuse>
+		<DebugSymbolsDir>$(MSBuildThisFileDirectory)build\DebugSymbols\</DebugSymbolsDir>
+		<PackageOutputPath>$(MSBuildThisFileDirectory)build\NuGet\</PackageOutputPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(OutputType)' == 'Library' and '$(IsTestProject)' != 'true'">
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<RepositoryType>git</RepositoryType>
+		<Authors>MAS</Authors>
+		<Company>MAS</Company>
+	</PropertyGroup>
+
+	<Target Name="MovePdbFiles" AfterTargets="Publish">
+		<ItemGroup>
+			<PdbFiles Include="$(PublishDir)**\*.pdb" />
+		</ItemGroup>
+
+		<MakeDir Directories="$(DebugSymbolsDir)" />
+
+		<Copy SourceFiles="@(PdbFiles)"
+			  DestinationFolder="$(DebugSymbolsDir)"
+			  SkipUnchangedFiles="true" />
+
+		<Delete Files="@(PdbFiles)" />
+	</Target>
+
+	<ItemGroup Condition="!$(MSBuildProjectDirectory.Contains('tests'))">
+		<Analyzer Include="$(MSBuildThisFileDirectory)libs\MAS.Analyzers.dll" />
+	</ItemGroup>
+</Project>

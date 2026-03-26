@@ -1,0 +1,4 @@
+### YamlMime:ManagedReference
+apiRules:
+  - exclude:
+      uidRegex: ^MAS\.SharedLibrary\.Resources(\..*)?$
