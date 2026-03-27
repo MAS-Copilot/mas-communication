@@ -16,7 +16,7 @@ jobs:
 
     env:
       Solution_Name: MAS.Communication.slnx
-      Project_Path: src/MAS.Communication/MAS.Communication.csproj
+      Project_Path: src/MAS.Communication.csproj
       Package_Output_Directory: build/NuGet
 
     steps:
