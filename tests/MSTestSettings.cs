@@ -1,10 +1,11 @@
 // =============================================================================
-// Professional Automation Equipment Manufacturer.
+// MAS.Communication
+// https://www.mas-automation.com/
 //
-// Documentation: https://mas-copilot.github.io/MAS.DataMaster-Docs/
-// Website:       https://www.mas-automation.com/
+// Copyright 2026 MAS (厦门威光) Corporation
 //
-// Copyright (c) MAS(厦门威光) Corporation. All rights reserved.
+// Licensed under the Apache License, Version 2.0
+// See LICENSE file in the project root for full license information.
 // =============================================================================
 
 [assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
