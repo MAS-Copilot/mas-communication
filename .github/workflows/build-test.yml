@@ -1,0 +1,52 @@
+name: MAS.Communication CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    env:
+      Solution_Name: MAS.Communication.slnx
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore $env:Solution_Name
+
+      - name: Build
+        run: dotnet build $env:Solution_Name --configuration ${{ matrix.configuration }} --no-restore
+
+      - name: Test
+        run: dotnet test $env:Solution_Name --configuration ${{ matrix.configuration }} --no-build --logger "trx;LogFileName=test_results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test-Results-${{ matrix.configuration }}
+          path: TestResults/**
+          if-no-files-found: warn

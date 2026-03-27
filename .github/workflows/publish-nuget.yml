@@ -1,0 +1,48 @@
+name: Publish NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Pack and Publish
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+
+    env:
+      Solution_Name: MAS.Communication.slnx
+      Project_Path: src/MAS.Communication/MAS.Communication.csproj
+      Package_Output_Directory: build/NuGet
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore $env:Solution_Name
+
+      - name: Build
+        run: dotnet build $env:Solution_Name --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test $env:Solution_Name --configuration Release --no-build
+
+      - name: Pack
+        run: dotnet pack $env:Project_Path --configuration Release --no-build --output $env:Package_Output_Directory
+
+      - name: Publish to NuGet.org
+        run: dotnet nuget push "${{ env.Package_Output_Directory }}\*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
