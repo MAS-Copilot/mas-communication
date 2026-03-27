@@ -5,7 +5,7 @@ root = true
 [*.cs]
 
 #### 文件头模板 ####
-file_header_template = =============================================================================\nProfessional Automation Equipment Manufacturer.\nWebsite:       https://www.mas-automation.com/\n\nCopyright (c) MAS(厦门威光) Corporation. All rights reserved.\n=============================================================================
+file_header_template = =============================================================================\nMAS.Communication\nhttps://www.mas-automation.com/\n\nCopyright 2026 MAS (厦门威光) Corporation\n\nLicensed under the Apache License, Version 2.0\nSee LICENSE file in the project root for full license information.\n=============================================================================
 
 #### Core EditorConfig 选项 ####
 
