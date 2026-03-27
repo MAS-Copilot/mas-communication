@@ -33,16 +33,46 @@ jobs:
             10.0.x
 
       - name: Restore dependencies
+        shell: pwsh
         run: dotnet restore $env:Solution_Name
 
       - name: Build
+        shell: pwsh
         run: dotnet build $env:Solution_Name --configuration Release --no-restore
 
       - name: Test
+        shell: pwsh
         run: dotnet test $env:Solution_Name --configuration Release --no-build
 
       - name: Pack
+        shell: pwsh
         run: dotnet pack $env:Project_Path --configuration Release --no-build --output $env:Package_Output_Directory
 
+      - name: List package output
+        shell: pwsh
+        run: |
+          Write-Host "Package output directory: $env:Package_Output_Directory"
+
+          if (-not (Test-Path $env:Package_Output_Directory)) {
+            throw "Package output directory does not exist: $env:Package_Output_Directory"
+          }
+
+          Get-ChildItem -Path $env:Package_Output_Directory -Force
+
       - name: Publish to NuGet.org
-        run: dotnet nuget push "${{ env.Package_Output_Directory }}\*.nupkg" --api-key "${{ secrets.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+        shell: pwsh
+        run: |
+          $packages = Get-ChildItem -Path $env:Package_Output_Directory -Filter "*.nupkg" |
+            Where-Object { $_.Name -notlike "*.symbols.nupkg" -and $_.Name -notlike "*.snupkg" }
+
+          if (-not $packages) {
+            throw "No .nupkg files found in $env:Package_Output_Directory"
+          }
+
+          foreach ($package in $packages) {
+            Write-Host "Pushing package: $($package.FullName)"
+            dotnet nuget push $package.FullName `
+              --api-key "${{ secrets.NUGET_API_KEY }}" `
+              --source "https://api.nuget.org/v3/index.json" `
+              --skip-duplicate
+          }
