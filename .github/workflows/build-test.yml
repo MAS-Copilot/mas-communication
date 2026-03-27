@@ -4,9 +4,24 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+    paths-ignore:
+      - 'src/**/*.md'
+      - 'tests/**/*.md'
+
   pull_request:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+    paths-ignore:
+      - 'src/**/*.md'
+      - 'tests/**/*.md'
+
   workflow_dispatch:
 
 jobs:
