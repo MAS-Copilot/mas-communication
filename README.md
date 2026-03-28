@@ -101,10 +101,28 @@ public sealed class ModbusTcpConfig : IModbusCommunicationConfig {
     public short Port { get; set; } = 502;
     public byte UnitId { get; set; } = 1;
 
-    public ModbusByteOrder ByteOrder { get; set; } = ModbusByteOrder.ABCD;
-    public ModbusWordOrder WordOrder { get; set; } = ModbusWordOrder.HighLow;
+    public ModbusByteOrder ByteOrder { get; set; } = ModbusByteOrder.BigEndian;
+    public ModbusWordOrder WordOrder { get; set; } = ModbusWordOrder.Normal;
 
     public bool UseOneBasedAddress { get; set; } = true;
+
+    public T Clone<T>() where T : ICommunicationConfig {
+        return (T)Clone();
+    }
+
+    public object Clone() {
+        return new ModbusTcpConfig {
+            Ip = Ip,
+            MaxRetries = MaxRetries,
+            ReadTimeout = ReadTimeout,
+            WriteTimeout = WriteTimeout,
+            Port = Port,
+            UnitId = UnitId,
+            ByteOrder = ByteOrder,
+            WordOrder = WordOrder,
+            UseOneBasedAddress = UseOneBasedAddress
+        };
+    }
 }
 ```
 
@@ -125,6 +143,8 @@ public sealed class DeviceService {
 ### 协议实例
 
 ```csharp
+var config = new ModbusTcpConfig();
+
 // 强类型，无需显式转换
 IModbusProtocol protocol = _protocolManager.GetOrCreate<IModbusProtocol>(config);
 
@@ -135,11 +155,11 @@ IModbusProtocol protocol = (IModbusProtocol)_protocolManager.GetOrCreate(config)
 ### 设备连接
 
 ```csharp
+// 测试连接
+bool isConnected = await protocol.ProbeConnectionAsync();
+
 // 建立连接
 await protocol.ConnectAsync();
-
-// 测试连接
-await protocol.ProbeConnectionAsync();
 
 // 关闭连接
 protocol.Disconnect();
