@@ -23,16 +23,6 @@
 
 适合构建中大型上位机系统中的通信基础设施层
 
-## ⚠️ 使用前提
-
-在使用本项目之前，请确认你的应用满足以下条件：
-
-- 使用 **现代 .NET 项目**
-- 目标框架为 **.NET 8.0 及以上**
-- 使用 **Microsoft.Extensions.DependencyInjection** 进行服务注册与解析
-- 不支持仍运行在 **.NET Framework** 上的项目
-- 仅适合在 WPF / WinUI / Worker / ASP.NET Core 中集成
-
 ## 🚀 快速开始
 
 ### 注册服务
