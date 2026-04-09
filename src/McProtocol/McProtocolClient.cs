@@ -8,7 +8,9 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
+#if !NETFRAMEWORK
 using System.Buffers;
+#endif
 using System.Net.Sockets;
 
 namespace MAS.Communication.McProtocol;
@@ -342,7 +344,7 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
             InvalidateConnection();
 
             TcpClient client = new();
-            await client.ConnectAsync(_config.Ip, _config.Port, cts).ConfigureAwait(false);
+            await ConnectTcpClientAsync(client, _config.Ip, _config.Port, cts).ConfigureAwait(false);
 
             ConfigureKeepAlive(client);
 
@@ -364,9 +366,11 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
 
         socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
+#if !NETFRAMEWORK
         if (!OperatingSystem.IsWindows()) {
             return;
         }
+#endif
 
         byte[] keepAliveValues = new byte[12];
         BitConverter.GetBytes(1u).CopyTo(keepAliveValues, 0);
@@ -446,15 +450,20 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
 
         await _streamLock.WaitAsync(cts).ConfigureAwait(false);
         try {
-            await _stream.WriteAsync(command, cts).ConfigureAwait(false);
-            await _stream.FlushAsync(cts).ConfigureAwait(false);
+            await WriteToStreamAsync(_stream, command, cts).ConfigureAwait(false);
+            await FlushStreamAsync(_stream, cts).ConfigureAwait(false);
 
             using MemoryStream memoryStream = new();
+
+#if NETFRAMEWORK
+            byte[] buffer = new byte[256];
+#else
             byte[] buffer = ArrayPool<byte>.Shared.Rent(256);
+#endif
 
             try {
                 int bytesRead;
-                while ((bytesRead = await _stream.ReadAsync(buffer, cts).ConfigureAwait(false)) > 0) {
+                while ((bytesRead = await ReadFromStreamAsync(_stream, buffer, cts).ConfigureAwait(false)) > 0) {
                     memoryStream.Write(buffer, 0, bytesRead);
                     if (bytesRead < buffer.Length) {
                         break;
@@ -467,11 +476,47 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
 
                 return memoryStream.ToArray();
             } finally {
+#if !NETFRAMEWORK
                 ArrayPool<byte>.Shared.Return(buffer);
+#endif
             }
         } finally {
             _ = _streamLock.Release();
         }
+    }
+
+    private static Task WriteToStreamAsync(NetworkStream stream, byte[] buffer, CancellationToken cts) {
+#if NETFRAMEWORK
+        return stream.WriteAsync(buffer, 0, buffer.Length, cts);
+#else
+        return stream.WriteAsync(buffer, cts).AsTask();
+#endif
+    }
+
+    private static Task<int> ReadFromStreamAsync(NetworkStream stream, byte[] buffer, CancellationToken cts) {
+#if NETFRAMEWORK
+        return stream.ReadAsync(buffer, 0, buffer.Length, cts);
+#else
+        return stream.ReadAsync(buffer, cts).AsTask();
+#endif
+    }
+
+    private static Task FlushStreamAsync(NetworkStream stream, CancellationToken cts) {
+#if NETFRAMEWORK
+        return stream.FlushAsync();
+#else
+        return stream.FlushAsync(cts);
+#endif
+    }
+
+    private static async Task ConnectTcpClientAsync(TcpClient client, string ip, int port, CancellationToken cts) {
+#if NETFRAMEWORK
+        cts.ThrowIfCancellationRequested();
+        await client.ConnectAsync(ip, port).ConfigureAwait(false);
+        cts.ThrowIfCancellationRequested();
+#else
+        await client.ConnectAsync(ip, port, cts).ConfigureAwait(false);
+#endif
     }
 
     private void DoDisconnect() {

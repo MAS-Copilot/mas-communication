@@ -39,7 +39,13 @@ internal sealed class ProtocolManager : IProtocolManager {
     }
 
     public IProtocol GetOrCreate(ICommunicationConfig config) {
+#if !NETFRAMEWORK
         ObjectDisposedException.ThrowIf(_disposed, this);
+#else
+        if (_disposed) {
+            throw new ObjectDisposedException(GetType().FullName);
+        }
+#endif
 
         string instanceId = config.GetInstanceKey();
         Lazy<IProtocol> newLazyProtocol = new(
@@ -85,7 +91,13 @@ internal sealed class ProtocolManager : IProtocolManager {
     }
 
     public bool Remove(string instanceId) {
+#if !NETFRAMEWORK
         ObjectDisposedException.ThrowIf(_disposed, this);
+#else
+        if (_disposed) {
+            throw new ObjectDisposedException(GetType().FullName);
+        }
+#endif
 
         if (!_protocols.TryRemove(instanceId, out Lazy<IProtocol>? lazyProtocol)) {
             return false;
@@ -97,7 +109,13 @@ internal sealed class ProtocolManager : IProtocolManager {
     }
 
     public bool Remove(IProtocol protocol) {
+#if !NETFRAMEWORK
         ObjectDisposedException.ThrowIf(_disposed, this);
+#else
+        if (_disposed) {
+            throw new ObjectDisposedException(GetType().FullName);
+        }
+#endif
 
         string instanceId = protocol.Configuration.GetInstanceKey();
 

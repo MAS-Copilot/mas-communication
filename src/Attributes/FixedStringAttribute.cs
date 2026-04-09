@@ -21,17 +21,20 @@ public sealed class FixedStringAttribute(int length) : Attribute {
     public int Length { get; } = length;
 
     /// <summary>
-    /// 获取编码方式，默认 ASCII 
+    /// 获取或设置编码方式
     /// </summary>
-    public string EncodingName { get; init; } = "ASCII";
+    /// <remarks>默认值： "ASCII" </remarks>
+    public string EncodingName { get; set;  } = "ASCII";
 
     /// <summary>
-    /// 获取填充字符，默认空字符 '\0' 
+    /// 获取或设置填充字符
     /// </summary>
-    public char PaddingChar { get; init; } = '\0';
+    /// <remarks>默认值： '\0'  </remarks>
+    public char PaddingChar { get; set; } = '\0';
 
     /// <summary>
-    /// 获取是否去除末尾填充，默认 true 
+    /// 获取或设置是否去除末尾填充
     /// </summary>
-    public bool TrimEndPadding { get; init; } = true;
+    /// <remarks>默认值： true </remarks>
+    public bool TrimEndPadding { get; set; } = true;
 }

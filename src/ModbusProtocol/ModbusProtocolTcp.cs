@@ -8,7 +8,9 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
+#if !NETFRAMEWORK
 using System.Buffers;
+#endif
 using System.Net.Sockets;
 
 namespace MAS.Communication.ModbusProtocol;
@@ -163,14 +165,7 @@ internal class ModbusProtocolTcp(IModbusCommunicationConfig configuration) : IMo
             byte[] bytes = ModbusRegisterBinaryHelper.RegistersToLittleEndianBytes(
                 registers, byteCount, _config.ByteOrder, _config.WordOrder);
 
-            object? obj = StructBinaryHelper.BytesToStruct(bytes, typeof(T));
-
-            if (obj is not T t) {
-                throw new ReadErrorException(
-                    $"Failed to convert bytes to struct. Type={typeof(T).FullName}, StartAddress={startAddress}");
-            }
-
-            return t;
+            return StructBinaryHelper.BytesToStruct<T>(bytes);
         } catch (OperationCanceledException) {
             throw;
         } catch (TimeoutException) {
@@ -333,7 +328,7 @@ internal class ModbusProtocolTcp(IModbusCommunicationConfig configuration) : IMo
             InvalidateConnection();
 
             _client = new TcpClient();
-            await _client.ConnectAsync(_config.Ip, _config.Port, cts).ConfigureAwait(false);
+            await ConnectTcpClientAsync(_client, _config.Ip, _config.Port, cts).ConfigureAwait(false);
             _client.Client.NoDelay = true;
             _stream = _client.GetStream();
         } catch (OperationCanceledException) {
@@ -354,7 +349,7 @@ internal class ModbusProtocolTcp(IModbusCommunicationConfig configuration) : IMo
 
         await _streamLock.WaitAsync(cts).ConfigureAwait(false);
         try {
-            await _stream.WriteAsync(requestFrame, cts).ConfigureAwait(false);
+            await WriteToStreamAsync(_stream, requestFrame, cts).ConfigureAwait(false);
             return await ReadModbusTcpFrameAsync(_stream, cts).ConfigureAwait(false);
         } finally {
             _ = _streamLock.Release();
@@ -371,6 +366,16 @@ internal class ModbusProtocolTcp(IModbusCommunicationConfig configuration) : IMo
         }
 
         int remaining = length - 1;
+
+#if NETFRAMEWORK
+        byte[] pdu = new byte[remaining];
+        await ReadExactAsync(stream, pdu, 0, remaining, cts).ConfigureAwait(false);
+
+        byte[] frame = new byte[7 + remaining];
+        Buffer.BlockCopy(header, 0, frame, 0, 7);
+        Buffer.BlockCopy(pdu, 0, frame, 7, remaining);
+        return frame;
+#else
         byte[] pdu = ArrayPool<byte>.Shared.Rent(remaining);
         try {
             await ReadExactAsync(stream, pdu, 0, remaining, cts).ConfigureAwait(false);
@@ -382,12 +387,20 @@ internal class ModbusProtocolTcp(IModbusCommunicationConfig configuration) : IMo
         } finally {
             ArrayPool<byte>.Shared.Return(pdu);
         }
+#endif
     }
 
     private static async Task ReadExactAsync(NetworkStream stream, byte[] buffer, int offset, int count, CancellationToken cts) {
         int readTotal = 0;
         while (readTotal < count) {
-            int read = await stream.ReadAsync(buffer.AsMemory(offset + readTotal, count - readTotal), cts).ConfigureAwait(false);
+            int read = await ReadFromStreamAsync(
+                stream,
+                buffer,
+                offset + readTotal,
+                count - readTotal,
+                cts
+            ).ConfigureAwait(false);
+
             if (read <= 0) {
                 throw new ReadErrorException("Connection closed while reading Modbus TCP frame.");
             }
@@ -437,6 +450,32 @@ internal class ModbusProtocolTcp(IModbusCommunicationConfig configuration) : IMo
 
         _stream = null;
         _client = null;
+    }
+
+    private static async Task ConnectTcpClientAsync(TcpClient client, string ip, int port, CancellationToken cts) {
+#if NETFRAMEWORK
+        cts.ThrowIfCancellationRequested();
+        await client.ConnectAsync(ip, port).ConfigureAwait(false);
+        cts.ThrowIfCancellationRequested();
+#else
+        await client.ConnectAsync(ip, port, cts).ConfigureAwait(false);
+#endif
+    }
+
+    private static Task WriteToStreamAsync(NetworkStream stream, byte[] buffer, CancellationToken cts) {
+#if NETFRAMEWORK
+        return stream.WriteAsync(buffer, 0, buffer.Length, cts);
+#else
+        return stream.WriteAsync(buffer, cts).AsTask();
+#endif
+    }
+
+    private static Task<int> ReadFromStreamAsync(NetworkStream stream, byte[] buffer, int offset, int count, CancellationToken cts) {
+#if NETFRAMEWORK
+        return stream.ReadAsync(buffer, offset, count, cts);
+#else
+        return stream.ReadAsync(buffer.AsMemory(offset, count), cts).AsTask();
+#endif
     }
 
     #endregion

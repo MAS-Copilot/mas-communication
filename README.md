@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/.NET-8.0-blue" />
-  <img src="https://img.shields.io/badge/license-Apache%202.0-green" />
+<img src="https://img.shields.io/badge/.NET-net10.0%20%7C%20net9.0%20%7C%20net8.0%20%7C%20net481-blue" />
+  <img src="https://img.shields.io/badge/license-MIT-green" />
   <a href="https://www.nuget.org/packages/MAS.Communication/">
     <img src="https://img.shields.io/nuget/v/MAS.Communication.svg" />
   </a>
@@ -45,11 +45,9 @@
 
 在使用本项目之前，请确认你的应用满足以下条件：
 
-- 使用 **现代 .NET 项目**
-- 目标框架为 **.NET 8.0 及以上**
-- 使用 **Microsoft.Extensions.DependencyInjection** 进行服务注册与解析
-- 不支持仍运行在 **.NET Framework** 上的项目（未进行测试）
-- 仅适合在 WPF / WinUI / Worker / ASP.NET Core 中集成
+- 目标框架支持 `net10.0`、`net9.0`、`net8.0` 或 `net481`
+- 使用 `Microsoft.Extensions.DependencyInjection` 进行服务注册与解析
+- 适合在 WPF、WinForms、WinUI、Worker、ASP.NET Core 等应用中集成
 
 ## 📦 NuGet
 
