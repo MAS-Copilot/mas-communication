@@ -14,7 +14,7 @@
 
 <p align="center">
 <img src="https://img.shields.io/badge/.NET-net10.0%20%7C%20net9.0%20%7C%20net8.0%20%7C%20net481-blue" />
-  <img src="https://img.shields.io/badge/license-MIT-green" />
+  <img src="https://img.shields.io/badge/license-Apache%202.0-green" />
   <a href="https://www.nuget.org/packages/MAS.Communication/">
     <img src="https://img.shields.io/nuget/v/MAS.Communication.svg" />
   </a>
