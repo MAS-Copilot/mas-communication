@@ -8,29 +8,14 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
-namespace MAS.Communication;
+#if NETFRAMEWORK
+
+namespace System.Runtime.CompilerServices;
 
 /// <summary>
-/// 通讯协议枚举
+/// 为 .NET Framework 目标提供 <c>init</c> 访问器与 <c>record</c> 类型所需的编译器占位类型
 /// </summary>
-public enum CommProtocol {
-    /// <summary>
-    /// 西门子 S7 协议
-    /// </summary>
-    S7,
+/// <remarks>该类型在现代 .NET 运行时中已由 BCL 提供，仅在缺失时补齐</remarks>
+internal static class IsExternalInit { }
 
-    /// <summary>
-    /// 三菱 MC协议
-    /// </summary>
-    MC,
-
-    /// <summary>
-    /// Modbus TCP 协议
-    /// </summary>
-    ModbusTcp,
-
-    /// <summary>
-    /// OPC UA 协议（客户端）
-    /// </summary>
-    OpcUa
-}
+#endif

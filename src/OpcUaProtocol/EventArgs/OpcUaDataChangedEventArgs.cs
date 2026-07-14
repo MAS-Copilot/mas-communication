@@ -8,29 +8,21 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
-namespace MAS.Communication;
+namespace MAS.Communication.OpcUaProtocol;
 
 /// <summary>
-/// 通讯协议枚举
+/// OPC UA 订阅数据变化事件参数
 /// </summary>
-public enum CommProtocol {
+/// <param name="subscriptionId">触发变化的订阅标识</param>
+/// <param name="value">变化后的值</param>
+public sealed class OpcUaDataChangedEventArgs(string subscriptionId, OpcUaValue value) : EventArgs {
     /// <summary>
-    /// 西门子 S7 协议
+    /// 获取触发变化的订阅标识
     /// </summary>
-    S7,
+    public string SubscriptionId { get; } = subscriptionId;
 
     /// <summary>
-    /// 三菱 MC协议
+    /// 获取变化后的值
     /// </summary>
-    MC,
-
-    /// <summary>
-    /// Modbus TCP 协议
-    /// </summary>
-    ModbusTcp,
-
-    /// <summary>
-    /// OPC UA 协议（客户端）
-    /// </summary>
-    OpcUa
+    public OpcUaValue Value { get; } = value;
 }

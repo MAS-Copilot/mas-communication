@@ -35,7 +35,7 @@
 - [x] Modbus TCP（[Sockets](https://github.com/dotnet/runtime/tree/main/src/libraries/System.Net.Sockets)）
 - [x] MC Protocol（[Sockets](https://github.com/dotnet/runtime/tree/main/src/libraries/System.Net.Sockets)）
 - [x] S7 Protocol（[S7.Net](https://github.com/S7NetPlus/s7netplus)）
-- [ ] OPC UA
+- [x] OPC UA（Client，[UA-.NETStandard](https://github.com/OPCFoundation/UA-.NETStandard)）
 - [ ] EtherNet/IP
 - [ ] MQTT
 - [ ] CANopen

@@ -8,29 +8,10 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
-namespace MAS.Communication;
+namespace MAS.Communication.OpcUaProtocol;
 
 /// <summary>
-/// 通讯协议枚举
+/// OPC UA 批量读取项
 /// </summary>
-public enum CommProtocol {
-    /// <summary>
-    /// 西门子 S7 协议
-    /// </summary>
-    S7,
-
-    /// <summary>
-    /// 三菱 MC协议
-    /// </summary>
-    MC,
-
-    /// <summary>
-    /// Modbus TCP 协议
-    /// </summary>
-    ModbusTcp,
-
-    /// <summary>
-    /// OPC UA 协议（客户端）
-    /// </summary>
-    OpcUa
-}
+/// <param name="NodeId">要读取的节点标识</param>
+public sealed record OpcUaReadItem(OpcUaNodeId NodeId);

@@ -8,29 +8,25 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
-namespace MAS.Communication;
+namespace MAS.Communication.OpcUaProtocol;
 
 /// <summary>
-/// 通讯协议枚举
+/// OPC UA 消息安全模式
 /// </summary>
-public enum CommProtocol {
+/// <remarks>与端点选择配合使用，决定客户端与服务端之间的消息保护级别</remarks>
+public enum OpcUaSecurityMode {
     /// <summary>
-    /// 西门子 S7 协议
+    /// 不进行任何签名或加密（不推荐用于生产环境）
     /// </summary>
-    S7,
+    None,
 
     /// <summary>
-    /// 三菱 MC协议
+    /// 仅对消息进行签名，保证完整性，但不加密
     /// </summary>
-    MC,
+    Sign,
 
     /// <summary>
-    /// Modbus TCP 协议
+    /// 对消息进行签名并加密，同时保证完整性与机密性
     /// </summary>
-    ModbusTcp,
-
-    /// <summary>
-    /// OPC UA 协议（客户端）
-    /// </summary>
-    OpcUa
+    SignAndEncrypt
 }
