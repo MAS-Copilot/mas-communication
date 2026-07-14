@@ -8,29 +8,24 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
-namespace MAS.Communication;
+namespace MAS.Communication.OpcUaProtocol;
 
 /// <summary>
-/// 通讯协议枚举
+/// OPC UA 客户端身份类型
 /// </summary>
-public enum CommProtocol {
+public enum OpcUaIdentityType {
     /// <summary>
-    /// 西门子 S7 协议
+    /// 匿名身份
     /// </summary>
-    S7,
+    Anonymous,
 
     /// <summary>
-    /// 三菱 MC协议
+    /// 用户名/密码身份，密码通过 <see cref="IOpcUaCredentialProvider"/> 解析
     /// </summary>
-    MC,
+    UserName,
 
     /// <summary>
-    /// Modbus TCP 协议
+    /// 客户端证书身份，使用 <see cref="IOpcUaCommunicationConfig.ClientCertificateThumbprint"/> 指定证书
     /// </summary>
-    ModbusTcp,
-
-    /// <summary>
-    /// OPC UA 协议（客户端）
-    /// </summary>
-    OpcUa
+    Certificate
 }

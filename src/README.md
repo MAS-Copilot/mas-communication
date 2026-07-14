@@ -4,7 +4,7 @@
 
 一个面向工业自动化场景的 **多协议通信管理框架**
 
-- **多协议统一抽象**：Modbus TCP、MC Protocol、等协议采用一致的调用模型
+- **多协议统一抽象**：Modbus TCP、MC Protocol、S7、OPC UA 等协议采用一致的生命周期与实例管理模型
 - **多实例管理**：支持同协议多实例并存，适用于一机多 PLC / 多设备通信场景
 - **统一生命周期控制**：统一创建、复用、查询与释放通信实例，避免资源失控
 - **依赖注入集成**：基于 `Microsoft.Extensions.DependencyInjection`，便于工程化接入
@@ -47,8 +47,12 @@ services.AddCommunication();
 
 - MC 协议使用：`IMcCommunicationConfig`
 - Modbus 协议使用：`IModbusCommunicationConfig`
+- S7 协议使用：`IS7CommunicationConfig`
+- OPC UA（Client）使用：`IOpcUaCommunicationConfig`
 
 以上接口均继承自 `ICommunicationConfig`，调用方实现对应接口后，即可将配置对象传入 `IProtocolManager`，用于创建或获取协议实例
+
+> OPC UA 保持自己的“节点、会话、订阅、安全”模型，业务能力通过专属接口 `IOpcUaProtocol` 暴露，而非地址读写接口
 
 ### 使用方式
 

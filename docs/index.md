@@ -41,6 +41,7 @@ services.AddCommunication();
 | MC（Mitsubishi） | `IMcCommunicationConfig` |
 | ModbusTCP | `IModbusCommunicationConfig` |
 | S7（Siemens） | `IS7CommunicationConfig` |
+| OPC UA（Client） | `IOpcUaCommunicationConfig` |
 
 以上接口均继承自 `ICommunicationConfig`，调用方需继承并实现它
 

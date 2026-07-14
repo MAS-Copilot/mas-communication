@@ -10,6 +10,7 @@
 
 using MAS.Communication.McProtocol;
 using MAS.Communication.ModbusProtocol;
+using MAS.Communication.OpcUaProtocol;
 using MAS.Communication.S7Protocol;
 using System.Collections.Concurrent;
 
@@ -150,6 +151,7 @@ internal sealed class ProtocolManager : IProtocolManager {
             IMcCommunicationConfig mc => new McProtocolClient(mc),
             IModbusCommunicationConfig md => new ModbusProtocolTcp(md),
             IS7CommunicationConfig s7 => new S7ProtocolClient(s7),
+            IOpcUaCommunicationConfig opcUa => new OpcUaProtocolClient(opcUa),
             _ => throw new NotSupportedException($"不支持的通讯配置类型：{config.GetInstanceKey()}")
         };
     }

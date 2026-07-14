@@ -469,11 +469,7 @@ public static class StructBinaryHelper {
 
         string s = field.GetValue(structValue) as string ?? string.Empty;
         if (s.Length > attr.Length) {
-#if !NETFRAMEWORK
             s = s[..attr.Length];
-#else
-            s = s.Substring(0, attr.Length);
-#endif
         }
 
         s = s.PadRight(attr.Length, attr.PaddingChar);

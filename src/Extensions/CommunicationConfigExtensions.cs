@@ -10,6 +10,7 @@
 
 using MAS.Communication.McProtocol;
 using MAS.Communication.ModbusProtocol;
+using MAS.Communication.OpcUaProtocol;
 using MAS.Communication.S7Protocol;
 
 namespace MAS.Communication;
@@ -29,7 +30,27 @@ public static class CommunicationConfigExtensions {
             IS7CommunicationConfig s7 => $"{s7.Type}-{s7.Ip}-{s7.Rack}-{s7.Slot}",
             IMcCommunicationConfig mc => $"{mc.ProtocolName}-{mc.ProtocolFrame}-{mc.Ip}-{mc.Port}",
             IModbusCommunicationConfig mb => $"{mb.ProtocolName}-{mb.Ip}-{mb.Port}-{mb.UnitId}",
+            IOpcUaCommunicationConfig opcUa => BuildOpcUaInstanceKey(opcUa),
             _ => throw new NotSupportedException($"Unsupported communication config type: {config.GetType().Name}")
         };
+    }
+
+    private static string BuildOpcUaInstanceKey(IOpcUaCommunicationConfig config) {
+        // 身份标识只使用非敏感字段；密码不参与实例键
+        string identityId = config.IdentityType switch {
+            OpcUaIdentityType.UserName => config.UserName ?? string.Empty,
+            OpcUaIdentityType.Certificate => config.ClientCertificateThumbprint ?? string.Empty,
+            _ => string.Empty
+        };
+
+        return $"OpcUa|{NormalizeEndpointUrl(config.EndpointUrl)}|{config.SecurityMode}|{config.SecurityPolicyUri}|{config.IdentityType}|{identityId}";
+    }
+
+    private static string NormalizeEndpointUrl(string endpointUrl) {
+        if (string.IsNullOrEmpty(endpointUrl)) {
+            return string.Empty;
+        }
+
+        return endpointUrl.Trim().TrimEnd('/').ToLowerInvariant();
     }
 }

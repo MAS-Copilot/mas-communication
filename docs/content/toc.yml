@@ -4,3 +4,5 @@
   href: MAS.Communication.ModbusProtocol.md
 - name: MAS.Communication.S7Protocol
   href: MAS.Communication.S7Protocol.md
+- name: MAS.Communication.OpcUaProtocol
+  href: MAS.Communication.OpcUaProtocol.md
