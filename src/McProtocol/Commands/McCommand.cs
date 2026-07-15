@@ -112,7 +112,10 @@ internal class McCommand(McFrame mcFrame) {
             case McFrame.MC1E:
                 min = 2;
                 if (min > response.Length) {
-                    break;
+                    // 帧长不足帧头即为残帧，抛出明确异常而不是静默返回空 Response，
+                    // 避免上层把「不完整响应」误当成「读到 0 字节数据」。
+                    throw new ReadErrorException(
+                        $"Incomplete MC1E response frame. Expected at least {min} bytes, but got {response.Length} bytes.");
                 }
 
                 _resultCode = response[min - 2];
@@ -129,7 +132,10 @@ internal class McCommand(McFrame mcFrame) {
             case McFrame.MC4E:
                 min = FrameType == McFrame.MC3E ? 11 : 15;
                 if (min > response.Length) {
-                    break;
+                    // 帧长不足帧头即为残帧，抛出明确异常而不是静默返回空 Response，
+                    // 避免上层把「不完整响应」误当成「读到 0 字节数据」。
+                    throw new ReadErrorException(
+                        $"Incomplete MC response frame. Expected at least {min} bytes, but got {response.Length} bytes.");
                 }
 
                 var btCount = new[] { response[min - 4], response[min - 3] };
