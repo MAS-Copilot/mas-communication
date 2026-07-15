@@ -7,9 +7,9 @@
 
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<DocumentationFile>../../build/APIDocumentation/MAS.Communication.xml</DocumentationFile>
-		<Version>1.1.0</Version>
-		<AssemblyVersion>1.1.0.0</AssemblyVersion>
-		<FileVersion>1.1.0.0</FileVersion>
+		<Version>1.1.1</Version>
+		<AssemblyVersion>1.1.1.0</AssemblyVersion>
+		<FileVersion>1.1.1.0</FileVersion>
 		<Authors>MAS(厦门威光)研发部</Authors>
 		<Company>MAS(厦门威光)</Company>
 		<Copyright>Copyright (c) MAS(厦门威光) Corporation. All rights reserved.</Copyright>

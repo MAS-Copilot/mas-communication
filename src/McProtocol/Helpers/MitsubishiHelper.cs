@@ -78,8 +78,10 @@ internal static class MitsubishiHelper {
     /// <param name="frameType">协议类型</param>
     /// <returns>如果响应数据不正确，返回 true；否则返回 false</returns>
     public static bool IsIncorrectResponse(McFrame frameType, byte[] response, int minLength) {
+        // 响应长度不足一个帧头即为残帧（不完整），必须判为「不正确」；
+        // 早前误将其判为「正确」放行，导致 TCP 分段产生的残帧被当作有效数据。
         if (response.Length < minLength) {
-            return false;
+            return true;
         }
 
         switch (frameType) {
