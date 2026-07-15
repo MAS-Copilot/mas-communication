@@ -59,7 +59,7 @@ public class McFrameReaderTest {
         byte[] expected = BuildSelfDescribingFrame(frame, data);
 
         using var stream = new ChunkedReadStream(expected, chunkSize);
-        byte[] actual = await McFrameReader.ReadResponseFrameAsync(stream, frame, expectedDataLength: 0);
+        byte[] actual = await McFrameReader.ReadResponseFrameAsync(stream, frame, expectedDataLength: 0, TestContext.CancellationTokenSource.Token);
 
         CollectionAssert.AreEqual(expected, actual,
             $"帧类型 {frame} 在每次最多读 {chunkSize} 字节的分段下未能正确拼接完整帧");
@@ -77,7 +77,7 @@ public class McFrameReaderTest {
 
         using var stream = new ChunkedReadStream(expected, chunkSize);
         byte[] actual = await McFrameReader.ReadResponseFrameAsync(
-            stream, McFrame.MC1E, expectedDataLength: data.Length);
+            stream, McFrame.MC1E, expectedDataLength: data.Length, TestContext.CancellationTokenSource.Token);
 
         CollectionAssert.AreEqual(expected, actual);
     }
@@ -89,7 +89,7 @@ public class McFrameReaderTest {
 
         using var stream = new ChunkedReadStream(expected, 1);
         byte[] actual = await McFrameReader.ReadResponseFrameAsync(
-            stream, McFrame.MC1E, expectedDataLength: 100);
+            stream, McFrame.MC1E, expectedDataLength: 100, TestContext.CancellationTokenSource.Token);
 
         CollectionAssert.AreEqual(expected, actual);
     }
@@ -101,7 +101,7 @@ public class McFrameReaderTest {
 
         using var stream = new ChunkedReadStream(partial, 8);
         _ = await Assert.ThrowsExactlyAsync<ConnectionException>(async () =>
-            await McFrameReader.ReadResponseFrameAsync(stream, McFrame.MC3E, expectedDataLength: 0));
+            await McFrameReader.ReadResponseFrameAsync(stream, McFrame.MC3E, expectedDataLength: 0, TestContext.CancellationTokenSource.Token));
     }
 
     [TestMethod]
@@ -112,7 +112,7 @@ public class McFrameReaderTest {
 
         using var stream = new ChunkedReadStream(truncated, 8);
         _ = await Assert.ThrowsExactlyAsync<ConnectionException>(async () =>
-            await McFrameReader.ReadResponseFrameAsync(stream, McFrame.MC3E, expectedDataLength: 0));
+            await McFrameReader.ReadResponseFrameAsync(stream, McFrame.MC3E, expectedDataLength: 0, TestContext.CancellationTokenSource.Token));
     }
 
     [TestMethod]
@@ -170,4 +170,6 @@ public class McFrameReaderTest {
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
+
+    public TestContext TestContext { get; set; }
 }
