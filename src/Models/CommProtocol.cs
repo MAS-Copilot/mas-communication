@@ -32,5 +32,10 @@ public enum CommProtocol {
     /// <summary>
     /// OPC UA 协议（客户端）
     /// </summary>
-    OpcUa
+    OpcUa,
+
+    /// <summary>
+    /// WebSocket 协议（客户端，通用传输层）
+    /// </summary>
+    WebSocket
 }

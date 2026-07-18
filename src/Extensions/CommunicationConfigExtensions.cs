@@ -12,6 +12,7 @@ using MAS.Communication.McProtocol;
 using MAS.Communication.ModbusProtocol;
 using MAS.Communication.OpcUaProtocol;
 using MAS.Communication.S7Protocol;
+using MAS.Communication.WebSocketProtocol;
 
 namespace MAS.Communication;
 
@@ -31,12 +32,35 @@ public static class CommunicationConfigExtensions {
             IMcCommunicationConfig mc => $"{mc.ProtocolName}-{mc.ProtocolFrame}-{mc.Ip}-{mc.Port}",
             IModbusCommunicationConfig mb => $"{mb.ProtocolName}-{mb.Ip}-{mb.Port}-{mb.UnitId}",
             IOpcUaCommunicationConfig opcUa => BuildOpcUaInstanceKey(opcUa),
+            IWebSocketCommunicationConfig webSocket => BuildWebSocketInstanceKey(webSocket),
             _ => throw new NotSupportedException($"Unsupported communication config type: {config.GetType().Name}")
         };
     }
 
+    private static string BuildWebSocketInstanceKey(IWebSocketCommunicationConfig config) {
+        return $"WebSocket|{NormalizeWebSocketEndpointUrl(config.EndpointUrl)}" +
+               $"|{config.SubProtocol ?? string.Empty}|{config.ConnectionIdentity ?? string.Empty}";
+    }
+
+    private static string NormalizeWebSocketEndpointUrl(string endpointUrl) {
+        string url = endpointUrl?.Trim() ?? string.Empty;
+        if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri)) {
+            return url;
+        }
+
+        string scheme = uri.Scheme.ToLowerInvariant();
+        string host = uri.Host.ToLowerInvariant();
+
+        int port = uri.Port;
+        bool hasExplicitPort = port > 0 &&
+            !(port == 80 && scheme == "ws") &&
+            !(port == 443 && scheme == "wss");
+        string portPart = hasExplicitPort ? $":{port}" : string.Empty;
+
+        return $"{scheme}://{host}{portPart}{uri.PathAndQuery}";
+    }
+
     private static string BuildOpcUaInstanceKey(IOpcUaCommunicationConfig config) {
-        // 身份标识只使用非敏感字段；密码不参与实例键
         string identityId = config.IdentityType switch {
             OpcUaIdentityType.UserName => config.UserName ?? string.Empty,
             OpcUaIdentityType.Certificate => config.ClientCertificateThumbprint ?? string.Empty,

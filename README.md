@@ -36,6 +36,7 @@
 - [x] MC Protocol（[Sockets](https://github.com/dotnet/runtime/tree/main/src/libraries/System.Net.Sockets)）
 - [x] S7 Protocol（[S7.Net](https://github.com/S7NetPlus/s7netplus)）
 - [x] OPC UA（Client，[UA-.NETStandard](https://github.com/OPCFoundation/UA-.NETStandard)）
+- [x] WebSocket（Client，[ClientWebSocket](https://learn.microsoft.com/dotnet/api/system.net.websockets.clientwebsocket)）
 - [ ] EtherNet/IP
 - [ ] MQTT
 - [ ] CANopen
