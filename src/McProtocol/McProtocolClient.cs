@@ -8,9 +8,6 @@
 // See LICENSE file in the project root for full license information.
 // =============================================================================
 
-#if !NETFRAMEWORK
-using System.Buffers;
-#endif
 using System.Net.Sockets;
 
 namespace MAS.Communication.McProtocol;
@@ -323,6 +320,9 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
                 return false;
             }
 
+            // socket.Connected 反映的是最近一次收发时的状态，对半开连接并不可靠；
+            // 这里再用 Poll + Available 识别对端已关闭的情况：Poll 返回可读且
+            // Available == 0，说明收到了对端的 FIN（连接已断），判定为不可用。
             if (socket.Poll(0, SelectMode.SelectRead) && socket.Available == 0) {
                 return false;
             }
@@ -389,8 +389,9 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
             _ => throw new Exception("Message frame not supported"),
         };
 
+        // 写请求的响应仅为确认帧（无数据部分），MC1E 预期数据长度为 0。
         byte[] rtResponse = await TryExecutionAsync(
-            sdCommand, length, cts: cts
+            sdCommand, length, expectedDataLength: 0, cts: cts
         ).ConfigureAwait(false);
 
         return mcCommand.SetResponse(rtResponse);
@@ -405,8 +406,10 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
             _ => throw new Exception("Message frame not supported"),
         };
 
+        // 读请求响应含数据部分。MC1E 响应头无长度字段，需按请求推算数据字节数
+        // （与 MC3E/MC4E 一致，返回 size 个点、每点 2 字节）；MC3E/MC4E 会改用帧头长度字段。
         byte[] rtResponse = await TryExecutionAsync(
-            sdCommand, length, cts: cts
+            sdCommand, length, expectedDataLength: size * 2, cts: cts
         ).ConfigureAwait(false);
 
         _ = mcCommand.SetResponse(rtResponse);
@@ -418,6 +421,7 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
     private async Task<byte[]> TryExecutionAsync(
         byte[] command,
         int minlength,
+        int expectedDataLength,
         int maxRetries = 10,
         TimeSpan? retryDelay = null,
         CancellationToken cts = default) {
@@ -426,7 +430,9 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
         int retryCount = 0;
 
         do {
-            response = await ExecuteAsync(command, cts).ConfigureAwait(false);
+            // ExecuteAsync 已按帧结构读满整帧；若对端关闭/传输异常会抛出并失效连接，
+            // 这里得到的始终是一帧完整响应（长度不小于帧头）。
+            response = await ExecuteAsync(command, expectedDataLength, cts).ConfigureAwait(false);
             retryCount++;
 
             if (MitsubishiHelper.IsIncorrectResponse(_config.ProtocolFrame, response, minlength)) {
@@ -443,43 +449,29 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
         return response;
     }
 
-    private async Task<byte[]> ExecuteAsync(byte[] command, CancellationToken cts = default) {
-        if (_stream == null) {
+    private async Task<byte[]> ExecuteAsync(byte[] command, int expectedDataLength, CancellationToken cts = default) {
+        if (_stream is not NetworkStream stream) {
             throw new InvalidOperationException("The network flow is uninitialized");
         }
 
         await _streamLock.WaitAsync(cts).ConfigureAwait(false);
         try {
-            await WriteToStreamAsync(_stream, command, cts).ConfigureAwait(false);
-            await FlushStreamAsync(_stream, cts).ConfigureAwait(false);
+            await WriteToStreamAsync(stream, command, cts).ConfigureAwait(false);
+            await FlushStreamAsync(stream, cts).ConfigureAwait(false);
 
-            using MemoryStream memoryStream = new();
-
-#if NETFRAMEWORK
-            byte[] buffer = new byte[256];
-#else
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(256);
-#endif
-
-            try {
-                int bytesRead;
-                while ((bytesRead = await ReadFromStreamAsync(_stream, buffer, cts).ConfigureAwait(false)) > 0) {
-                    memoryStream.Write(buffer, 0, bytesRead);
-                    if (bytesRead < buffer.Length) {
-                        break;
-                    }
-                }
-
-                if (memoryStream.Length == 0) {
-                    throw new Exception("The connection has been disconnected");
-                }
-
-                return memoryStream.ToArray();
-            } finally {
-#if !NETFRAMEWORK
-                ArrayPool<byte>.Shared.Return(buffer);
-#endif
-            }
+            // TCP 是字节流，一帧 MC 响应可能被拆成多个分段到达。必须按协议帧结构读满
+            // 整帧，不能用单次读的长度判断消息边界，否则会拿到残帧并让后续读取永久错位。
+            return await McFrameReader.ReadResponseFrameAsync(
+                stream, _config.ProtocolFrame, expectedDataLength, cts).ConfigureAwait(false);
+        } catch (OperationCanceledException) {
+            // 读写超时或被主动取消不属于断线，保持内部连接状态不变，直接向上传播。
+            throw;
+        } catch {
+            // 发送/接收阶段出现 EOF 或 IO/Socket 等传输异常，均视为连接已失效：
+            // 复位内部连接状态后再向上传播，确保随后重连时能真正重建连接，
+            // 也避免残帧留下的脏字节让之后每次读取都错位、故障蔓延。
+            InvalidateConnection();
+            throw;
         } finally {
             _ = _streamLock.Release();
         }
@@ -490,14 +482,6 @@ internal class McProtocolClient(IMcCommunicationConfig config) : IMcProtocol {
         return stream.WriteAsync(buffer, 0, buffer.Length, cts);
 #else
         return stream.WriteAsync(buffer, cts).AsTask();
-#endif
-    }
-
-    private static Task<int> ReadFromStreamAsync(NetworkStream stream, byte[] buffer, CancellationToken cts) {
-#if NETFRAMEWORK
-        return stream.ReadAsync(buffer, 0, buffer.Length, cts);
-#else
-        return stream.ReadAsync(buffer, cts).AsTask();
 #endif
     }
 
