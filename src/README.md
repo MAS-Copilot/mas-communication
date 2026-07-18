@@ -4,7 +4,7 @@
 
 一个面向工业自动化场景的 **多协议通信管理框架**
 
-- **多协议统一抽象**：Modbus TCP、MC Protocol、S7、OPC UA 等协议采用一致的生命周期与实例管理模型
+- **多协议统一抽象**：Modbus TCP、MC Protocol、S7、OPC UA、WebSocket 等协议采用一致的生命周期与实例管理模型
 - **多实例管理**：支持同协议多实例并存，适用于一机多 PLC / 多设备通信场景
 - **统一生命周期控制**：统一创建、复用、查询与释放通信实例，避免资源失控
 - **依赖注入集成**：基于 `Microsoft.Extensions.DependencyInjection`，便于工程化接入
@@ -49,10 +49,13 @@ services.AddCommunication();
 - Modbus 协议使用：`IModbusCommunicationConfig`
 - S7 协议使用：`IS7CommunicationConfig`
 - OPC UA（Client）使用：`IOpcUaCommunicationConfig`
+- WebSocket（Client）使用：`IWebSocketCommunicationConfig`
 
 以上接口均继承自 `ICommunicationConfig`，调用方实现对应接口后，即可将配置对象传入 `IProtocolManager`，用于创建或获取协议实例
 
 > OPC UA 保持自己的“节点、会话、订阅、安全”模型，业务能力通过专属接口 `IOpcUaProtocol` 暴露，而非地址读写接口
+>
+> WebSocket 定位为通用传输层，通过专属接口 `IWebSocketProtocol` 暴露文本/二进制消息收发、心跳与自动重连；消息序列化约定、请求-响应匹配等应用层能力由调用方实现
 
 ### 使用方式
 

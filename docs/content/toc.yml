@@ -6,3 +6,5 @@
   href: MAS.Communication.S7Protocol.md
 - name: MAS.Communication.OpcUaProtocol
   href: MAS.Communication.OpcUaProtocol.md
+- name: MAS.Communication.WebSocketProtocol
+  href: MAS.Communication.WebSocketProtocol.md

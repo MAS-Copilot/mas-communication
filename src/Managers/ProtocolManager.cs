@@ -12,6 +12,7 @@ using MAS.Communication.McProtocol;
 using MAS.Communication.ModbusProtocol;
 using MAS.Communication.OpcUaProtocol;
 using MAS.Communication.S7Protocol;
+using MAS.Communication.WebSocketProtocol;
 using System.Collections.Concurrent;
 
 namespace MAS.Communication;
@@ -152,6 +153,7 @@ internal sealed class ProtocolManager : IProtocolManager {
             IModbusCommunicationConfig md => new ModbusProtocolTcp(md),
             IS7CommunicationConfig s7 => new S7ProtocolClient(s7),
             IOpcUaCommunicationConfig opcUa => new OpcUaProtocolClient(opcUa),
+            IWebSocketCommunicationConfig webSocket => new WebSocketProtocolClient(webSocket),
             _ => throw new NotSupportedException($"不支持的通讯配置类型：{config.GetInstanceKey()}")
         };
     }
